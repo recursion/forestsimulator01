@@ -5,7 +5,7 @@ export class Mob {
     this.el = d3.select('#canvas').append("circle")
       .attr("cx", positionX)
       .attr("cy", positionY)
-      .attr("r", game.getScreenSize().w / radius)
+      .attr("r", radius)
       .attr("fill", color)
       .attr("stroke", "black");
 

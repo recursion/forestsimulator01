@@ -2,6 +2,9 @@
 
 import {KeyboardEventsHandler} from './keyboardEventsHandler.js';
 import {Mob} from './mob.js';
+import {Map} from './map.js';
+
+const TILESIZE = 16;
 
 // create a game module for handling boilerplate
 // game stuff (init, load assets, switch levels?
@@ -14,7 +17,11 @@ export class Game{
     this.canvas = document.getElementById("canvas");
     this.setCanvasSize();
 
+    // create a new map
+    this.map = new Map(this.canvas, TILESIZE);
+
     // instantiate our keyboard event handler
+    // this simply keeps track of what keys are currently pressed
     this.keyboardEventsHandler = new KeyboardEventsHandler();
 
     // add event listeners
@@ -24,25 +31,30 @@ export class Game{
 
 
     // load assets
-    this.player = new Mob(this, 60, 60, 100, "green");
+    let tr = TILESIZE / 2;
+    this.player = new Mob(this, tr, tr, tr, "green");
 
   }
 
+  /*
+   * Checks the games keyboardEventsHandler object
+   * and adjusts player direction accordingly
+   */
   processPlayerInput() {
     // TODO: These should be generic and configurable
     // up (w)
     if (this.keyboardEventsHandler.keys[87]) {
-      this.player.dy = -this.player.speed;
+      this.player.dy = -TILESIZE;
     }
 
     // left (a)
     if (this.keyboardEventsHandler.keys[65]) {
-      this.player.dx = -this.player.speed;
+      this.player.dx = -TILESIZE;
     }
 
     // right (d)
     if (this.keyboardEventsHandler.keys[68]) {
-      this.player.dx = this.player.speed;
+      this.player.dx = TILESIZE;
     }
 
     // x
@@ -51,7 +63,7 @@ export class Game{
 
     // down (s)
     if (this.keyboardEventsHandler.keys[83]) {
-      this.player.dy = this.player.speed;
+      this.player.dy = TILESIZE;
     }
 
     if (!this.keyboardEventsHandler.keys[87] && !this.keyboardEventsHandler.keys[83]){
@@ -83,7 +95,7 @@ export class Game{
   }
 
   setCanvasSize() {
-    var screen = Game.prototype.getScreenSize();
+    var screen = this.getScreenSize();
     this.canvas.setAttribute("width", screen.w);
     this.canvas.setAttribute("height", screen.h);
   }
@@ -99,10 +111,10 @@ export class Game{
   // through using the return from setInterval, but I need to check
   // the proper way to do o
   run() {
-    var self = this;
-    setInterval(function(){
-      self.processPlayerInput();
-      self.player.move();
+    setInterval(()=>{
+      this.processPlayerInput();
+      this.player.move();
+      this.map.update();
     }, 1000 / 60);
   }
 }
