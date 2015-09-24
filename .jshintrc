@@ -1,0 +1,27 @@
+{
+  "undef": true,
+  "strict": false,
+  "unused": true,
+  "node": true,
+  "esnext": true,
+  "bitwise": true,
+  "eqeqeq": true,
+  "immed": true,
+  "latedef": "nofunc",
+  "newcap": true,
+  "noarg": true,
+  "regexp": true,
+  "undef": true,
+  "smarttabs": true,
+  "asi": true,
+  "debug": true,
+  "globals": {
+      "angular": false,
+      "_": false,
+      "window": false,
+      "document": false,
+      "d3": false,
+      "describe": false,
+      "it": false
+  }
+}
