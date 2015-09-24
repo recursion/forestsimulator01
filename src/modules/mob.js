@@ -11,12 +11,22 @@ export class Mob {
 
     this.jumping = false;
     this.speed = 2;
+    this.width = 16;
+    this.height = 16;
     this.dx = 0;
     this.dy = 0;
   }
   move() {
-    this.el.attr("cx", (+this.el.attr("cx") + this.dx));
-    this.el.attr("cy", (+this.el.attr("cy") + this.dy));
+    let xMove = +this.el.attr("cx") + this.dx;
+    let yMove = +this.el.attr("cy") + this.dy;
+
+    if (xMove + this.width < this.game.map.width * this.game.map.tilesize && xMove >= 0){
+      this.el.attr("cx", xMove);
+    }
+
+    if (yMove + this.height < this.game.map.height * this.game.map.tilesize && yMove >= 0){
+      this.el.attr("cy", yMove);
+    }
   }
 }
 
