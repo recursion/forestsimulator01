@@ -31,7 +31,7 @@ export class Game{
 
 
     // load assets
-    this.player = new Mob(this.map, 8, 8, "green");
+    this.player = new Mob(this.map, 8, 8, "white");
 
   }
 

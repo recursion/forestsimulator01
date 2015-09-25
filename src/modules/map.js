@@ -10,39 +10,31 @@ export class Map {
     this.width = Math.floor(w / tilesize);
     this.height = Math.floor(h / tilesize);
 
+    this.tiles = [];
+
     this.tilesize = tilesize;
 
     this.generate();
 
     // add tile elements to screen
-    this.el = d3.select('#canvas');
-    for (let y = 0; y < this.height; y++) {
-      for (let x = 0; x < this.width; x++) {
-      this.el.append("rect")
-        .attr("x", ' ' + this.tiles[y][x].x)
-        .attr("y", ' ' + this.tiles[y][x].y)
-        .attr("width", ' ' + this.tiles[y][x].width)
-        .attr("height", ' ' + this.tiles[y][x].height)
+    this.el = d3.select('#canvas').selectAll("rect")
+      .data(this.tiles)
+      .enter()
+      .append("rect")
+        .attr("x", function(d){ return d.x;})
+        .attr("y", function(d){ return d.y;})
+        .attr("width", function(d){ return d.width;})
+        .attr("height", function(d){ return d.height;})
         .attr("stroke", 'black')
-        .attr("fill", this.tiles[y][x].color);
+        .attr("fill", function(d){ return d.color;});
 
-      }
-     }
   }
 
   // generate a new map
   generate() {
-    // create an array that is the length of the tileheight
-    this.tiles = new Array(this.height);
     for (let y = 0; y < this.height; y++) {
-
-      // in each element in the height array, create
-      // an array of columns
-      this.tiles[y] = new Array(this.width);
       for (let x = 0; x < this.width; x++) {
-
-        this.tiles[y][x] = new Tile("grass", x, y, this.tilesize);
-
+        this.tiles.push(new Tile("grass", x, y, this.tilesize));
       }
     }
   }
@@ -54,9 +46,10 @@ export class Map {
 
     for (let y = startPoint.y - halfCluster; y < startPoint.y + halfCluster; y++){
       for (let x = startPoint.x - halfCluster; x < startPoint.x + halfCluster; x++) {
-        tile = this.getTile(y,x);
+        tile = _.filter(this.tiles, _.matches({'x': x, 'y': y}));
         if (tile) {
-          this.tiles[y][x] = new Tile(obj, x, y, this.tilesize);
+
+          tile.addItem(obj);
         }
       }
     }
@@ -70,15 +63,12 @@ export class Map {
     // and our map is ordered by tiles
     // divide the coordinates by our tile size
     // to get the correct index
-    yCoord /= this.tilesize;
-    xCoord /= this.tilesize;
+    let tile = _.filter(this.tiles, _.matches({'x': xCoord, 'y': yCoord}));
 
-    if (!this.tiles[yCoord]){
-      return null;
-    } else if (!this.tiles[yCoord][xCoord]){
-      return null;
+    if (tile){
+      return tile[0];
     } else {
-      return this.tiles[yCoord][xCoord];
+      return null;
     }
   }
 
@@ -94,10 +84,8 @@ export class Map {
     let tile = this.getTile(y, x);
 
     // determine if we are hitting a wall
-    let isWall;
     if (tile instanceof Tile) {
-      isWall = tile.isWall();
-      if (isWall){
+      if (tile.isWall()){
         return;
       }
     } else {
@@ -106,10 +94,10 @@ export class Map {
 
     // bounds checking
     if (xCoord <= this.width * this.tilesize && xCoord >= 0){
-      obj.el.attr("cx", xCoord);
+      obj.el.attr("cx", '' + xCoord);
     }
     if (yCoord <= this.height * this.tilesize && yCoord >= 0){
-      obj.el.attr("cy", yCoord);
+      obj.el.attr("cy", '' + yCoord);
     }
 
   }
