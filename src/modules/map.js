@@ -1,4 +1,13 @@
-const TILETYPES = ['ground', 'ground', 'ground', 'ground', 'ground', 'ground', 'ground','ground', 'wall', 'poo'];
+const TILETYPES = ['dirt', 'road', 'grass', 'sand', 'mud', 'water', 'rock', 'wall'];
+
+const TREE = {
+  src: "assets/tree54.svg",
+};
+  /*
+   *.attr("xlink:href","https://upload.wikimedia.org/wikipedia/commons/d/d8/Compass_card_(de).svg")
+    .attr("width", 100)
+    .attr("height", 100)
+    */
 
 function setRandomTileType() {
   var randy = Math.floor(Math.random() * (TILETYPES.length - 0));
@@ -11,28 +20,73 @@ class Tile {
       if (type === "rand") {
         return setRandomTileType();
       } else {
-        return type;
+        if (TILETYPES.indexOf(type) !== -1){
+          return type;
+        } else {
+          throw new Error('Unknown tile type: ', type);
+        }
       }
     })();
+
     this.x = x * size;
     this.y = y * size;
     this.width = size;
     this.height = size;
+
+    // items placed on this tile
+    this.items = [];
+
     switch(this.type){
-      case 'ground':
-        this.color = 'white';
+      case 'dirt':
+        this.color = 'darkbrown';
         break;
       case 'wall':
         this.color = 'grey';
         break;
-      case 'poo':
-        this.color = 'brown';
+      case 'water':
+        this.color = 'blue';
+        break;
+      case 'road':
+        this.color = 'black';
+        break;
+      case 'sand':
+        this.color = 'white';
+        break;
+      case 'rock':
+        this.color = 'lightgrey';
+        break;
+      case 'grass':
+        this.color = 'green';
+        break;
+      case 'mud':
+        this.color = 'lightbrown';
         break;
       default:
         this.color = 'orange';
         break;
     }
   }
+  addItem(item){
+    //console.log('Adding ', item, ' to tile');
+    this.items.push(item);
+  }
+  removeItem(item){
+    //console.log('Removing', item, ' from tile');
+    let itemIndex = this.items.indexOf(item);
+    if (itemIndex === -1){
+      console.error('Item: ', item, ' not found');
+    } else {
+      item = this.items[itemIndex];
+      this.items.splice(itemIndex, 1);
+      return item;
+    }
+
+  }
+
+  draw() {
+
+  }
+
   isWall() {
     return this.type === 'wall';
   }
@@ -50,18 +104,7 @@ export class Map {
 
     this.tilesize = tilesize;
 
-    // generate a new map
-    // create an array that is the length of the tileheight
-    this.tiles = new Array(this.height);
-    for (let y = 0; y < this.height; y++) {
-
-      // in each element in the height array, create
-      // an array of columns
-      this.tiles[y] = new Array(this.width);
-      for (let x = 0; x < this.width; x++) {
-        this.tiles[y][x] = new Tile("rand", x, y, tilesize);
-      }
-    }
+    this.generate();
 
     // add tile elements to screen
     this.el = d3.select('#canvas');
@@ -78,6 +121,39 @@ export class Map {
       }
      }
   }
+
+  // generate a new map
+  generate() {
+    // create an array that is the length of the tileheight
+    this.tiles = new Array(this.height);
+    for (let y = 0; y < this.height; y++) {
+
+      // in each element in the height array, create
+      // an array of columns
+      this.tiles[y] = new Array(this.width);
+      for (let x = 0; x < this.width; x++) {
+
+        this.tiles[y][x] = new Tile("grass", x, y, this.tilesize);
+
+      }
+    }
+  }
+
+  createCluster(obj, startPoint){
+    let clusterSize = 10;
+    let halfCluster = clusterSize / 2;
+    let tile;
+
+    for (let y = startPoint.y - halfCluster; y < startPoint.y + halfCluster; y++){
+      for (let x = startPoint.x - halfCluster; x < startPoint.x + halfCluster; x++) {
+        tile = this.getTile(y,x);
+        if (tile) {
+          this.tiles[y][x] = new Tile(obj, x, y, this.tilesize);
+        }
+      }
+    }
+  }
+
   // take in an x and a y coordinate
   // and return a tile from the map
   // returns null if the tile cannot be found
@@ -102,7 +178,7 @@ export class Map {
   // attempt to place an object on a map tile
   place(obj, yCoord, xCoord){
 
-
+    // translate from tilecenters to tile start
     let x = (xCoord - this.tilesize / 2);
     let y = (yCoord - this.tilesize / 2);
 
@@ -124,12 +200,9 @@ export class Map {
     if (xCoord <= this.width * this.tilesize && xCoord >= 0){
       obj.el.attr("cx", xCoord);
     }
-
-    // bounds checking
     if (yCoord <= this.height * this.tilesize && yCoord >= 0){
       obj.el.attr("cy", yCoord);
     }
-
 
   }
   update() {

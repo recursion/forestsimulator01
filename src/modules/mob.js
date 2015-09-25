@@ -10,7 +10,8 @@ export class Mob {
       .attr("stroke", "black");
 
     this.jumping = false;
-    this.speed = 2;
+    this.speed = 100;
+    this.timeOfLastMove = 0;
 
     this.width = this.map.tilesize;
     this.height = this.map.tilesize;
@@ -21,9 +22,17 @@ export class Mob {
   }
 
   update() {
-    let xCoord = (+this.el.attr("cx") + this.dx);
-    let yCoord = (+this.el.attr("cy") + this.dy);
-    this.map.place(this, yCoord, xCoord);
+    this.move();
+  }
+
+  move() {
+    // only move if we have not move in the last this.speed seconds
+    if (this.timeOfLastMove === 0 || Date.now() - this.timeOfLastMove > this.speed) {
+      let xCoord = (+this.el.attr("cx") + this.dx);
+      let yCoord = (+this.el.attr("cy") + this.dy);
+      this.map.place(this, yCoord, xCoord);
+      this.timeOfLastMove = Date.now();
+    }
   }
 }
 
