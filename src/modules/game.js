@@ -94,7 +94,7 @@ export class Game{
   }
 
   setCanvasSize() {
-    var screen = this.getScreenSize();
+    var screen = Game.prototype.getScreenSize();
     this.canvas.setAttribute("width", screen.w);
     this.canvas.setAttribute("height", screen.h);
   }

@@ -59,16 +59,9 @@ export class Map {
     for (let i = 0; i < 5; i++) {
       var x = Math.random() * (this.width * this.tilesize - 0);
       var y = Math.random() * (this.height * this.tilesize - 0);
-      this.createTreeCluster({y: y, x: x});
+      this.createCluster(Tree, {y: y, x: x});
     }
-    /*
-    d3.select('#canvas').insert("image")
-      .attr("xlink:href", 'http://localhost:8000/assets/trees/tree54.svg')
-      .attr('width', 16)
-      .attr('height', 16)
-      .attr('x', 50)
-      .attr('y', 50);
-    */
+
   }
 
   /*
@@ -76,10 +69,7 @@ export class Map {
    * - ideally should be an 'island' of tiles
    *   that contains the obj
    */
-  createTreeCluster(startpoint){
-    let clusterSize = 4;
-    let halfCluster = clusterSize / 2;
-    let tile;
+  createCluster(obj, startpoint){
 
     // format and translate the startpoint into something we can use
     // (get an integer that is a multiple of our tilesize)
@@ -99,29 +89,39 @@ export class Map {
       [-1, -1]  // nw
     ];
 
-    // takes a location, finds the closest tile
-    // that donst already have an item, and returns it
-    let placeTree = (y, x) => {
+    // validates the tile is real
+    // and can hold the item being placed
+    // if it is/can the work callback is
+    // called with the tile passed as an argument
+    let validate = (y, x, work, unique) => {
       let tile = this.getTile(y, x);
       if (tile){
-        // if tile already has a tree
-        if (tile.items[tile.items.length] instanceof Tree){
-          // dont count this one and fine a new spot
-          return null;
+        if (unique){
+          // if tile already has one
+          if (tile.items[tile.items.length] instanceof obj.constructor){
+            // dont count this one and find a new spot
+            return null;
+          } else {
+            return work(tile);
+          }
         } else {
-          let tree = new Tree(this.layers.midground, y, x);
-          tile.addItem(tree);
-          return tree;
+          return work(tile);
         }
       }
     };
+    var placeTree = (tile)=>{
+      let tree = new Tree(this.layers.midground, y, x);
+      tile.addItem(obj);
+      return tree;
+    };
 
-    for (let i  = 0; i < 15; i++){
+    for (let i  = 0; i < 5; i++){
 
       // if we cant place the tree
-      if(!placeTree(y, x)){
+      if(!validate(y, x, placeTree, true)){
         // reset the counter
         i--;
+        continue;
       }
       // pick random direction
       let dir = Math.floor(Math.random() * 8);
@@ -130,25 +130,7 @@ export class Map {
       x = x + (newDir[1] * this.tilesize);
 
     }
-  /*
-    for (let y = startPoint.y - halfCluster; y < startPoint.y + halfCluster; y++){
-      for (let x = startPoint.x - halfCluster; x < startPoint.x + halfCluster; x++) {
-        y = Math.floor(y / this.tilesize);
-        x = Math.floor(x / this.tilesize);
-        y *= this.tilesize;
-        x *= this.tilesize;
-
-        tile = this.getTile(y, x);
-        if (tile) {
-          //console.log('adding tree at: ', y, x);
-          tile.addItem(new Tree(this.layers.midground, y, x));
-        } else {
-          console.log('Invalid location');
-        }
-      }
-    }
-  */
-  }
+   }
 
   // take in an x and a y coordinate
   // and return a tile from the map
