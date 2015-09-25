@@ -2,7 +2,7 @@
 export class Mob {
   constructor(map, positionX="8", positionY="8", color="blue") {
     this.map = map;
-    this.el = d3.select('#canvas').append("circle")
+    this.el = map.layers.foreground.append("circle")
       .attr("cx", positionX)
       .attr("cy", positionY)
       .attr("r", ' ' + Math.floor(this.map.tilesize / 2))
