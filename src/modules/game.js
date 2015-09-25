@@ -31,8 +31,7 @@ export class Game{
 
 
     // load assets
-    let tr = TILESIZE / 2;
-    this.player = new Mob(this, tr, tr, tr, "green");
+    this.player = new Mob(this.map, 8, 8, "green");
 
   }
 
@@ -113,7 +112,7 @@ export class Game{
   run() {
     setInterval(()=>{
       this.processPlayerInput();
-      this.player.move();
+      this.player.update();
       this.map.update();
     }, 1000 / 60);
   }
