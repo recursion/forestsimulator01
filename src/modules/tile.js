@@ -80,7 +80,12 @@ export class Tile {
 
   }
 
-  draw() {
+  update() {
+    // draw the first item in this.items
+    // if it hasnt already been drawn
+    if (this.items.length){
+      console.log('item to draw');
+    }
 
   }
 

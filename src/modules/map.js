@@ -1,5 +1,17 @@
 import {Tile} from './tile.js';
 
+class Tree {
+  constructor(y, x){
+    this.el = d3.select('#canvas').selectAll('image')
+      .data([1])
+      .enter()
+      .append('image')
+      .attr("xlink:href", 'http://localhost:8000/assets/trees/tree54.svg')
+      .attr('x', x)
+      .attr('y', y);
+  }
+}
+
 export class Map {
   constructor(screen, tilesize=32){
 
@@ -37,6 +49,11 @@ export class Map {
         this.tiles.push(new Tile("grass", x, y, this.tilesize));
       }
     }
+    for (let i = 0; i < 5; i++) {
+      var x = Math.random() * (this.width - 0);
+      var y = Math.random() * (this.width - 0);
+      this.createCluster(Tree, {y: y, x: x});
+    }
   }
 
   createCluster(obj, startPoint){
@@ -46,10 +63,10 @@ export class Map {
 
     for (let y = startPoint.y - halfCluster; y < startPoint.y + halfCluster; y++){
       for (let x = startPoint.x - halfCluster; x < startPoint.x + halfCluster; x++) {
-        tile = _.filter(this.tiles, _.matches({'x': x, 'y': y}));
+        tile = this.getTile(y, x);
         if (tile) {
 
-          tile.addItem(obj);
+          tile.addItem(new Tree(y, x));
         }
       }
     }
@@ -59,10 +76,6 @@ export class Map {
   // and return a tile from the map
   // returns null if the tile cannot be found
   getTile(yCoord, xCoord) {
-    // since our map matrix is in a sequence orderd by 1s
-    // and our map is ordered by tiles
-    // divide the coordinates by our tile size
-    // to get the correct index
     let tile = _.filter(this.tiles, _.matches({'x': xCoord, 'y': yCoord}));
 
     if (tile){
@@ -101,8 +114,9 @@ export class Map {
     }
 
   }
-  update() {
-
-
+  update(){
+    this.tiles.forEach(function(tile){
+      tile.update();
+    });
   }
 }
