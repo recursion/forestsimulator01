@@ -286,10 +286,10 @@ export class Map {
     // determine if we are hitting a wall
     if (tile instanceof Tile) {
       if (tile.isWall()){
-        return;
+        return 'wall';
       }
     } else {
-      return;
+      return 'invalid tile';
     }
 
     // bounds checking
@@ -300,11 +300,12 @@ export class Map {
       obj.el.attr("cy", '' + yCoord);
     }
 
+    return 'success';
   }
   update(){
     this.tiles.forEach(function(tile){
       tile.update();
-      setTimeout(nothing, 0);
+      //setTimeout(nothing, 0);
     });
   }
 }

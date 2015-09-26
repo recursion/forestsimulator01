@@ -1,7 +1,7 @@
 {
-  "name": "es6-game-boilerplate",
+  "name": "forest",
   "version": "0.0.1",
-  "description": "A minimal browser based game using id3, es6, gulp, and browserify.",
+  "description": "A forest simulation prototype",
   "author": "recursion",
   "license": "ISC",
   "dependencies": {

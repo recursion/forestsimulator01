@@ -1,5 +1,5 @@
-## es6 boilerplate
-A minimal es6 boilerplate using gulp and browserify.
+## Forest
+Simple forest simulation prototype using d3.
 
 ##### Usage
 > `gulp` - builds the system to the dist directory and starts watchers for html, css and js.

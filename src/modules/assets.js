@@ -114,7 +114,7 @@ export class Grass extends Plant {
     super(map, x, y, 1, 50);
     this.reproductionRate = 99;
     this.maxSize = Math.floor((this.map.tilesize * 2) * (Math.random()));
-    this.lifespan = 1000 * Math.random() * (2 - 0.5) - 0.5;
+    this.lifespan = 5000 * Math.random() * (2 - 0.5) - 0.5;
     this.layer = this.map.midground;
     this.el = this.layer.append('image')
       .attr("xlink:href", 'http://localhost:8000/assets/grass.svg')

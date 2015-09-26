@@ -91,7 +91,7 @@ export class Tile {
     // if it hasnt already been drawn
     this.items.forEach(function(item){
       item.update();
-      setTimeout(nothing, 0);
+      //setTimeout(nothing, 0);
     });
   }
 
