@@ -63,10 +63,12 @@ export class Tile {
         break;
     }
   }
+
   addItem(item){
     //console.log('Adding ', item, ' to tile');
     this.items.push(item);
   }
+
   removeItem(item){
     //console.log('Removing', item, ' from tile');
     let itemIndex = this.items.indexOf(item);
@@ -78,6 +80,10 @@ export class Tile {
       return item;
     }
 
+  }
+
+  items(){
+    return this.items;
   }
 
   update() {

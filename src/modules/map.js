@@ -1,15 +1,5 @@
 import {Tile} from './tile.js';
-
-class Tree {
-  constructor(layer, y, x){
-    layer.append('image')
-      .attr("xlink:href", 'http://localhost:8000/assets/trees/tree54.svg')
-      .attr('width', 16)
-      .attr('height', 16)
-      .attr('x', x)
-      .attr('y', y);
-  }
-}
+import {Tree, Grass} from './assets.js';
 
 export class Map {
   constructor(screen, tilesize=32){
@@ -57,10 +47,18 @@ export class Map {
     }
     // make some tree clusters
     for (let i = 0; i < 5; i++) {
-      var x = Math.random() * (this.width * this.tilesize - 0);
-      var y = Math.random() * (this.height * this.tilesize - 0);
+      let x = Math.random() * (this.width * this.tilesize - 0);
+      let y = Math.random() * (this.height * this.tilesize - 0);
       this.createCluster(Tree, {y: y, x: x});
     }
+    /*
+    // make some Grass clusters
+    for (let i = 0; i < 5; i++) {
+      let x = Math.random() * (this.width * this.tilesize - 0);
+      let y = Math.random() * (this.height * this.tilesize - 0);
+      this.createCluster(Grass , {y: y, x: x});
+    }
+    */
 
   }
 
@@ -78,6 +76,123 @@ export class Map {
     y *= this.tilesize;
     x *= this.tilesize;
 
+    // validates the tile is real
+    // and can hold the item being placed
+    // if it is/can the work callback is
+    // called with the tile passed as an argument
+    let validate = (y, x, obj, work, unique) => {
+      let tile = this.getTile(y, x);
+      if (tile){
+        if (unique){
+          // if tile already has one
+          if (tile.items[tile.items.length - 1] instanceof obj.constructor){
+            // dont do the work
+            return null;
+          } else {
+            return work(obj, tile);
+          }
+        } else {
+          return work(obj, tile);
+        }
+      } else {
+        return null;
+      }
+    };
+    // a function that places a tree on a tile
+    // and returns the tree
+    let place = (Obj, tile)=>{
+      if (!tile instanceof Tile){
+        throw new Error('Invalid tile');
+      }
+      if (Math.random() > 0.5){
+        let o = new Obj(this.layers.midground, tile.y, tile.x);
+        tile.addItem(o);
+        return o;
+      } else {
+        return null;
+      }
+    };
+
+    // a function that does nothing
+    let nothing = function(){};
+
+    let incrementTile = (dir) => {
+      switch(dir){
+        case 'up':
+          y -= this.tilesize;
+          break;
+        case 'right':
+          x += this.tilesize;
+          break;
+        case 'down':
+          y += this.tilesize;
+          break;
+        case 'left':
+          x -= this.tilesize;
+          break;
+        default:
+          break;
+      }
+      return [y, x];
+    };
+
+    // dir
+    // 0 = up   1 = right
+    // 2 = down 3 = left
+    let applyJobToTiles = (tileCoords, dir, numTiles, job) => {
+      let y = tileCoords.y;
+      let x = tileCoords.x;
+      for (let i = 0; i < numTiles; i++){
+        [y, x] = incrementTile(dir);
+        job(y, x);
+      }
+      return [y, x];
+    };
+
+    let i = 0;
+    let _inc = 1;
+    let limit = 28;
+    // place initial tree
+    if (validate(y, x, obj, place, true)){
+      i++;
+    }
+    while (i < limit){
+
+      // move right x tiles, creating an object on each tile
+      [y, x] = applyJobToTiles({y: y, x: x}, 'right', _inc, (a, b)=>{
+        if (validate(a, b, obj, place, true)){
+          i++;
+        }
+      });
+
+      [y, x] = applyJobToTiles({y: y, x: x}, 'down', _inc, (a, b)=>{
+        if (validate(a, b, obj, place, true)){
+          i++;
+        }
+      });
+
+      _inc++;
+
+      [y, x] = applyJobToTiles({y: y, x: x}, 'left', _inc, (a, b)=>{
+        if (validate(a, b, obj, place, true)){
+          i++;
+        }
+      });
+
+      // if its the last run, do 1 less tile
+      if (i + 1 >= limit) {
+        _inc = _inc - 1;
+      }
+      [y, x] = applyJobToTiles({y: y, x: x}, 'up', _inc, (a, b)=>{
+        if (validate(a, b, obj, place, true)){
+          i++;
+        }
+      });
+
+      _inc++;
+    }
+
+    /*
     let directionalVectors = [
       [-1,0],   // n
       [-1, 1],  // ne
@@ -88,34 +203,7 @@ export class Map {
       [0, -1],  // w
       [-1, -1]  // nw
     ];
-
-    // validates the tile is real
-    // and can hold the item being placed
-    // if it is/can the work callback is
-    // called with the tile passed as an argument
-    let validate = (y, x, work, unique) => {
-      let tile = this.getTile(y, x);
-      if (tile){
-        if (unique){
-          // if tile already has one
-          if (tile.items[tile.items.length] instanceof obj.constructor){
-            // dont count this one and find a new spot
-            return null;
-          } else {
-            return work(tile);
-          }
-        } else {
-          return work(tile);
-        }
-      }
-    };
-    var placeTree = (tile)=>{
-      let tree = new Tree(this.layers.midground, y, x);
-      tile.addItem(obj);
-      return tree;
-    };
-
-    for (let i  = 0; i < 5; i++){
+    for (let i  = 0; i < 15; i++){
 
       // if we cant place the tree
       if(!validate(y, x, placeTree, true)){
@@ -129,7 +217,20 @@ export class Map {
       y = y + (newDir[0] * this.tilesize);
       x = x + (newDir[1] * this.tilesize);
 
+      if (y < 0) {
+        y = 0;
+      } else if (y > this.height * this.tilesize){
+        y = this.height * this.tilesize;
+      }
+
+      if (x < 0) {
+        x = 0;
+      } else if (x > this.width * this.tilesize){
+        x = this.width * this.tilesize;
+      }
+      setTimeout(nothing, 0);
     }
+    */
    }
 
   // take in an x and a y coordinate

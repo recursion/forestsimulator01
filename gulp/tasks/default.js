@@ -7,4 +7,5 @@ gulp.task('build', ['copy-html', 'build-css', 'build-js']);
 // default task
 gulp.task("default", ['build'], function () {
   gulp.start('watch');
+  gulp.start('serve');
 });
