@@ -1,6 +1,9 @@
 import {Tile} from './tile.js';
 import {Tree, Grass} from './assets.js';
 
+// pretty much every where vectors are used
+// im following a y, x pattern
+// I have no idea why.. but thats what i decided on
 export class Map {
   constructor(screen, tilesize=32){
 
@@ -35,6 +38,21 @@ export class Map {
         .attr("stroke", 'black')
         .attr("fill", function(d){ return d.color;});
 
+  }
+
+  vectors(){
+    // use this to find
+    // new tiles
+    return {
+      n: [-1,0],
+      ne: [-1, 1],
+      e: [0, 1],
+      se: [1, 1],
+      s: [1, 0],
+      sw: [1, -1],
+      w: [0, -1],
+      nw: [-1, -1]
+    };
   }
 
   // generate a new map
