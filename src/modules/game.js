@@ -1,7 +1,7 @@
 "use strict";
 
 import {KeyboardEventsHandler} from './keyboardEventsHandler.js';
-import {Mob} from './mob.js';
+import {Mob, Squirrel} from './mob.js';
 import {Map} from './map.js';
 
 const TILESIZE = 16;
@@ -32,6 +32,13 @@ export class Game{
 
     // load assets
     this.player = new Mob(this.map, 8, 8, "white");
+
+    /*
+    this.squirrels = [];
+    while (this.squirrels.length < 15){
+      this.squirrels.push(new Squirrel(this.map, 24, 24));
+    }
+    */
 
   }
 
@@ -113,6 +120,11 @@ export class Game{
     setInterval(()=>{
       this.processPlayerInput();
       this.player.update();
+      /*
+      this.squirrels.forEach(function(s){
+        s.update();
+      });
+      */
       this.map.update();
     }, 1000 / 60);
   }

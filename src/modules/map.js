@@ -40,6 +40,9 @@ export class Map {
 
   }
 
+  // useful for translating
+  // direction abbreviations
+  // to actual vectors
   vectors(){
     // use this to find
     // new tiles
@@ -127,9 +130,6 @@ export class Map {
         return null;
       }
     };
-
-    // a function that does nothing
-    let nothing = function(){};
 
     let incrementTile = (dir) => {
       switch(dir){
@@ -304,6 +304,8 @@ export class Map {
   update(){
     this.tiles.forEach(function(tile){
       tile.update();
+      setTimeout(nothing, 0);
     });
   }
 }
+function nothing(){}

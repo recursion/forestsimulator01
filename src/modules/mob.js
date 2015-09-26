@@ -2,7 +2,7 @@
 export class Mob {
   constructor(map, positionX="8", positionY="8", color="blue") {
     this.map = map;
-    this.el = map.foreground.append("circle")
+    this.el = map.midground.append("circle")
       .attr("cx", positionX)
       .attr("cy", positionY)
       .attr("r", ' ' + Math.floor(this.map.tilesize / 2))
@@ -26,13 +26,24 @@ export class Mob {
   }
 
   move() {
-    // only move if we have not move in the last this.speed seconds
-    if (this.timeOfLastMove === 0 || Date.now() - this.timeOfLastMove > this.speed) {
-      let xCoord = (+this.el.attr("cx") + this.dx);
-      let yCoord = (+this.el.attr("cy") + this.dy);
-      this.map.place(this, yCoord, xCoord);
-      this.timeOfLastMove = Date.now();
-    }
+    let xCoord = (+this.el.attr("cx") + this.dx);
+    let yCoord = (+this.el.attr("cy") + this.dy);
+    this.map.place(this, yCoord, xCoord);
+    this.timeOfLastMove = Date.now();
   }
 }
 
+export class Squirrel extends Mob {
+  constructor(map, x, y){
+    super(map, x, y, 'grey');
+  }
+  update(){
+
+    super.update();
+    // is there food here
+    this.dx = Math.floor(Math.random() * 2);
+    this.dy = Math.floor(Math.random() * 2);
+    // move towards food
+
+  }
+}

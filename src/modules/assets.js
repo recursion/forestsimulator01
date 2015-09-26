@@ -17,8 +17,8 @@ export class GameObject {
 
     let newDirection = this.map.vectors()[dirs[Math.floor(Math.random() * dirs.length)]];
     // move further away occasionally
-    newDirection[0] *= 2;
-    newDirection[1] *= 2;
+    newDirection[0] *= Math.floor(Math.random() * (4-1) + 1);
+    newDirection[1] *= Math.floor(Math.random() * (4-1) + 1);
     let newY = this.y + newDirection[0] * this.map.tilesize;
     let newX = this.x + newDirection[1] * this.map.tilesize;
     return [newY, newX];
@@ -33,25 +33,47 @@ export class GameObject {
 export class Plant extends GameObject {
   constructor(map, y, x, size, growthRate){
     super(map, x, y, size, size);
-    this.growthRate = growthRate;
+    let growthRateModifier = (Math.random() * (5 - 1) +1);
+    if (Math.random() > 0.5){
+      growthRateModifier = -growthRateModifier;
+    }
+    this.growthRate = Math.abs(Math.floor(growthRate + growthRateModifier));
+    this.reproductionRate = 25;
     this.maxSize = this.map.tilesize;
-    this.lifespan = 10000 * Math.random();
-    this.lastSpawned = 0;
+    this.lifespan = 1000 * Math.random() * (2 - 0.5) + 0.5;
   }
 
   die(){
+    // remove from dom
     this.el.remove();
-    // needs to call parent
-    // so that it really dies
+
+    // remove from parent tile
+    let tile = this.map.getTile(this.y % this.map.tilesize, this.x % this.map.tilesize);
+    let i = tile.items.indexOf(this);
+    tile.items.splice(i, 1);
   }
 
   spawn() {
     let [newX, newY] = this.getNearbyTile();
     let tile = this.map.getTile(newY, newX);
-    if (tile && Date.now() - this.lastSpawned > 1000){
-      tile.addItem(new this.constructor(this.map, newY, newX));
-      this.lastSpawned = Date.now();
+    if (tile){
+      if (tile.items.length === 0) {
+        tile.addItem(new this.constructor(this.map, newY, newX));
+      }
     }
+  }
+
+  grow() {
+    // do some growing
+    let growBy = this.growthRate * Math.random() * (1 - 0.1) + 0.1;
+    growBy /= 100;
+    if (+this.el.attr("width") < this.maxSize){
+      this.el
+        .attr("transform", "translate(16," + (this.map.tilesize / 2) + ")")
+        .attr("width", +this.el.attr("width") + growBy)
+        .attr("height", +this.el.attr("height") + growBy);
+    }
+
   }
 
   update(){
@@ -60,38 +82,25 @@ export class Plant extends GameObject {
     // time to die?
     if (this.age >= this.lifespan) {
       this.die();
+      return;
     }
 
-    // do some growing
-    let growBy = this.growthRate / Math.random();
-    if (+this.el.attr("width") + growBy < this.maxSize){
-      this.el
-        .attr("transform", "translate(16," + (this.map.tilesize / 2) + ")")
-        .attr("width", +this.el.attr("width") + growBy)
-        .attr("height", +this.el.attr("height") + growBy);
-    }
+    this.grow();
 
     // spawn?
-    // are we old enough?
-    if (this.age > this.lifespan / 4){
-      // is it the right 'time of the month'?
-      let now = Date.now();
-      if (now % 99 === 0 && now % 7){
-        // if we are lucky
-        if (Math.random() > 0.85){
-          this.spawn();
-        }
-      }
+    if ((Math.random() * 100) < this.reproductionRate){
+      this.spawn();
     }
   }
-
 }
 
 export class Tree extends Plant {
   constructor(map, y, x){
-    super(map, x, y, 1, 0.00115);
+    super(map, x, y, 1, 10);
+    this.reproductionRate = 5;
+    this.maxSize = Math.floor((this.map.tilesize * 3) * (Math.random()));
+    this.lifespan = 10000 * Math.random() * (2 - 0.5) - 0.5;
     this.layer = this.map.foreground;
-    this.maxSize = this.map.tilesize * (2 + Math.random());
     this.el = this.layer.append('image')
       .attr("xlink:href", 'http://localhost:8000/assets/trees/tree54.svg')
       .attr('width', 1)
@@ -102,7 +111,10 @@ export class Tree extends Plant {
 }
 export class Grass extends Plant {
   constructor(map, y, x){
-    super(map, x, y, 1, 0.005);
+    super(map, x, y, 1, 50);
+    this.reproductionRate = 99;
+    this.maxSize = Math.floor((this.map.tilesize * 2) * (Math.random()));
+    this.lifespan = 1000 * Math.random() * (2 - 0.5) - 0.5;
     this.layer = this.map.midground;
     this.el = this.layer.append('image')
       .attr("xlink:href", 'http://localhost:8000/assets/grass.svg')
@@ -111,4 +123,5 @@ export class Grass extends Plant {
       .attr('x', x)
       .attr('y', y);
   }
+
 }
