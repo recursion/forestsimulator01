@@ -79,12 +79,12 @@ export class Game{
         p.el
           .transition()
           .duration(100)
-          .attr("cy",  ' ' + (+p.el.attr("cy") - 80))
+          .attr("y",  ' ' + (+p.el.attr("y") - 80))
           .each('end', function() {
             p.el
               .transition()
               .duration(100)
-              .attr("cy", ' ' + (+p.el.attr("cy") + 80))
+              .attr("y", ' ' + (+p.el.attr("y") + 80))
               .each('end', function() {
                 p.jumping = false;
               });

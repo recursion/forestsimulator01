@@ -10,10 +10,9 @@ export class Map {
 
     let svg = d3.select('#canvas');
 
-    this.layers = {};
-    this.layers.background = svg.append('g');
-    this.layers.midground = svg.append('g');
-    this.layers.foreground = svg.append('g');
+    this.background = svg.append('g');
+    this.midground = svg.append('g');
+    this.foreground = svg.append('g');
 
     this.width = Math.floor(w / tilesize);
     this.height = Math.floor(h / tilesize);
@@ -25,7 +24,7 @@ export class Map {
     this.generate();
 
     // add tile elements to background layer screen
-    this.layers.background.selectAll("rect")
+    this.background.selectAll("rect")
       .data(this.tiles)
       .enter()
       .append("rect")
@@ -46,19 +45,17 @@ export class Map {
       }
     }
     // make some tree clusters
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i <= 5; i++) {
       let x = Math.random() * (this.width * this.tilesize - 0);
       let y = Math.random() * (this.height * this.tilesize - 0);
       this.createCluster(Tree, {y: y, x: x});
     }
-    /*
     // make some Grass clusters
     for (let i = 0; i < 5; i++) {
       let x = Math.random() * (this.width * this.tilesize - 0);
       let y = Math.random() * (this.height * this.tilesize - 0);
       this.createCluster(Grass , {y: y, x: x});
     }
-    */
 
   }
 
@@ -85,7 +82,7 @@ export class Map {
       if (tile){
         if (unique){
           // if tile already has one
-          if (tile.items[tile.items.length - 1] instanceof obj.constructor){
+          if (tile.items[tile.items.length - 1]){
             // dont do the work
             return null;
           } else {
@@ -105,7 +102,7 @@ export class Map {
         throw new Error('Invalid tile');
       }
       if (Math.random() > 0.5){
-        let o = new Obj(this.layers.midground, tile.y, tile.x);
+        let o = new Obj(this, tile.y, tile.x);
         tile.addItem(o);
         return o;
       } else {
@@ -136,7 +133,10 @@ export class Map {
       return [y, x];
     };
 
-    // dir
+    // applyJobToTiles
+    // takes coordinates, a direction, number of tiles
+    // and a callback to be performed on the number of tiles specified
+    // dir(ection)
     // 0 = up   1 = right
     // 2 = down 3 = left
     let applyJobToTiles = (tileCoords, dir, numTiles, job) => {
@@ -152,10 +152,13 @@ export class Map {
     let i = 0;
     let _inc = 1;
     let limit = 28;
-    // place initial tree
+
+    // place initial item
     if (validate(y, x, obj, place, true)){
       i++;
     }
+
+    // randomly place items in an outward growing rectangle pattern
     while (i < limit){
 
       // move right x tiles, creating an object on each tile
@@ -165,20 +168,24 @@ export class Map {
         }
       });
 
+      // move down
       [y, x] = applyJobToTiles({y: y, x: x}, 'down', _inc, (a, b)=>{
         if (validate(a, b, obj, place, true)){
           i++;
         }
       });
 
+      // increase incrementor
       _inc++;
 
+      // move left
       [y, x] = applyJobToTiles({y: y, x: x}, 'left', _inc, (a, b)=>{
         if (validate(a, b, obj, place, true)){
           i++;
         }
       });
 
+      // move up
       // if its the last run, do 1 less tile
       if (i + 1 >= limit) {
         _inc = _inc - 1;
@@ -189,6 +196,7 @@ export class Map {
         }
       });
 
+      // increment the incrementor
       _inc++;
     }
 
